@@ -30,8 +30,11 @@ st.caption("EDA, feature engineering, regression, classification, and XGBoost tu
 # Functions
 # --------------------------------------------------
 @st.cache_data
-def load_data(uploaded_file):
-     df = pd.read_excel("data/Cleaned_FAANG_Data-1.xlsx")
+def load_data():
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    file_path = BASE_DIR / "data" / "Cleaned_FAANG_Data-1.xlsx"
+    
+    df = pd.read_excel(file_path)
     return df
 
 
