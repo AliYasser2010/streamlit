@@ -1213,4 +1213,3 @@ st.caption(
 )
 ```
 
-ده المفروض يلغي طلب الـUpload تمامًا. بس تأكد إن ملف الـExcel موجود في GitHub داخل `data` بجانب `app.py`. لو عملت Commit للكود والملف بالشكل ده، اعمل **Reboot app** في Streamlit Cloud وهيقرأ الملف تلقائيًا.
