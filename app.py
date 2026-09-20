@@ -31,7 +31,8 @@ st.caption("EDA, feature engineering, regression, classification, and XGBoost tu
 # --------------------------------------------------
 @st.cache_data
 def load_data(uploaded_file):
-    return df = pd.read_excel("data/Cleaned_FAANG_Data-1.xlsx")
+     df = pd.read_excel("data/Cleaned_FAANG_Data-1.xlsx")
+    return df
 
 
 def prepare_data(raw_df):
