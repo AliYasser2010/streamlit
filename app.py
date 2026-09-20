@@ -16,7 +16,6 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBClassifier, XGBRegressor
 
-
 st.set_page_config(
     page_title="FAANG Stock Analysis & ML",
     page_icon="📈",
@@ -32,14 +31,14 @@ st.caption("EDA, feature engineering, regression, classification, and XGBoost tu
 # --------------------------------------------------
 @st.cache_data
 def load_data(uploaded_file):
-    return pd.read_excel(uploaded_file)
+    return df = pd.read_excel("data/Cleaned_FAANG_Data-1.xlsx")
 
 
 def prepare_data(raw_df):
     df = raw_df.copy()
 
     required_columns = [
-        "Source.Name", "Date", "Close", "High", "Low", "Adj Close"
+        "Company", "Date", "Close", "High", "Low", "Adj Close"
     ]
 
     missing = [c for c in required_columns if c not in df.columns]
@@ -50,51 +49,51 @@ def prepare_data(raw_df):
 
     df["Date"] = pd.to_datetime(df["Date"])
     df = df.sort_values(
-        by=["Source.Name", "Date"]
+        by=["Company", "Date"]
     ).reset_index(drop=True)
 
     # EDA features
     df["EDA_Daily_Return"] = (
-        df.groupby("Source.Name")["Adj Close"].pct_change()
+        df.groupby("Company")["Adj Close"].pct_change()
     )
 
     df["SMA_50_Adj"] = (
-        df.groupby("Source.Name")["Adj Close"]
+        df.groupby("Company")["Adj Close"]
         .transform(lambda x: x.rolling(50).mean())
     )
 
     df["SMA_200_Adj"] = (
-        df.groupby("Source.Name")["Adj Close"]
+        df.groupby("Company")["Adj Close"]
         .transform(lambda x: x.rolling(200).mean())
     )
 
     # ML features
     df["Close_Lag1"] = (
-        df.groupby("Source.Name")["Close"].shift(1)
+        df.groupby("Company")["Close"].shift(1)
     )
     df["Close_Lag5"] = (
-        df.groupby("Source.Name")["Close"].shift(5)
+        df.groupby("Company")["Close"].shift(5)
     )
 
     df["SMA_10"] = (
-        df.groupby("Source.Name")["Close"]
+        df.groupby("Company")["Close"]
         .transform(lambda x: x.rolling(10).mean())
     )
 
     df["SMA_50"] = (
-        df.groupby("Source.Name")["Close"]
+        df.groupby("Company")["Close"]
         .transform(lambda x: x.rolling(50).mean())
     )
 
     df["High_Low_Range"] = df["High"] - df["Low"]
 
     df["Daily_Return"] = (
-        df.groupby("Source.Name")["Close"].pct_change() * 100
+        df.groupby("Company")["Close"].pct_change() * 100
     )
 
     # Targets
     df["Target_Price"] = (
-        df.groupby("Source.Name")["Close"].shift(-1)
+        df.groupby("Company")["Close"].shift(-1)
     )
 
     df["Target_Direction"] = (
@@ -322,7 +321,7 @@ if uploaded_file is None:
 ### Expected columns
 The uploaded file should contain at least:
 
-- `Source.Name`
+- `Company`
 - `Date`
 - `Open`
 - `High`
@@ -344,7 +343,7 @@ except Exception as e:
 # --------------------------------------------------
 # Basic information
 # --------------------------------------------------
-companies = sorted(df["Source.Name"].unique())
+companies = sorted(df["Company"].unique())
 
 st.sidebar.header("🔎 Filters")
 
@@ -356,7 +355,7 @@ selected_company = st.sidebar.selectbox(
 if selected_company == "All":
     view_df = df.copy()
 else:
-    view_df = df[df["Source.Name"] == selected_company].copy()
+    view_df = df[df["Company"] == selected_company].copy()
 
 st.sidebar.write(f"Rows available: {len(view_df):,}")
 
@@ -381,7 +380,7 @@ with tab1:
     c1, c2, c3, c4 = st.columns(4)
 
     c1.metric("Rows", f"{len(raw_df):,}")
-    c2.metric("Companies", raw_df["Source.Name"].nunique())
+    c2.metric("Companies", raw_df["Company"].nunique())
     c3.metric("Missing Values", int(raw_df.isnull().sum().sum()))
     c4.metric("Duplicates", int(raw_df.duplicated().sum()))
 
@@ -400,7 +399,7 @@ with tab1:
         else [selected_company]
     ):
         temp = view_df[
-            view_df["Source.Name"] == company
+            view_df["Company"] == company
         ]
 
         ax.plot(
@@ -428,7 +427,7 @@ with tab1:
         ma_company = selected_company
 
     ma_df = df[
-        df["Source.Name"] == ma_company
+        df["Company"] == ma_company
     ].copy()
 
     fig, ax = plt.subplots(figsize=(12, 5))
@@ -460,7 +459,7 @@ with tab1:
     st.subheader("Company Statistics")
 
     company_stats = df.groupby(
-        "Source.Name"
+        "Company"
     )["Adj Close"].agg(
         ["mean", "median", "std", "min", "max"]
     )
@@ -479,7 +478,7 @@ with tab1:
         else [selected_company]
     ):
         temp = view_df[
-            view_df["Source.Name"] == company
+            view_df["Company"] == company
         ]
 
         sns.histplot(
@@ -500,7 +499,7 @@ with tab1:
 
     pivot_returns = df.pivot_table(
         index="Date",
-        columns="Source.Name",
+        columns="Company",
         values="Daily_Return"
     )
 
@@ -635,11 +634,11 @@ with tab4:
 
     if selected_company != "All":
         prediction_df = prediction_df[
-            prediction_df["Source.Name"] == selected_company
+            prediction_df["Company"] == selected_company
         ]
 
     display_cols = [
-        "Source.Name",
+        "Company",
         "Date",
         "Close",
         "Target_Price",
