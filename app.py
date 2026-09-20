@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+from pathlib import Path
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.metrics import (
@@ -31,14 +31,18 @@ st.caption("EDA, feature engineering, regression, classification, and XGBoost tu
 # --------------------------------------------------
 @st.cache_data
 def load_data():
+
     BASE_DIR = Path(__file__).resolve().parent.parent
+
     file_path = BASE_DIR / "data" / "Cleaned_FAANG_Data-1.xlsx"
-    
+
     df = pd.read_excel(file_path)
+
     return df
 
 
 def prepare_data(raw_df):
+
     df = raw_df.copy()
 
     required_columns = [
